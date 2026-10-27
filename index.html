@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GIẢI MÃ NH₃ &amp; MUỐI AMMONIUM</title>
+<style>
+  :root {
+    /* Quiet, neutral surfaces with a restrained green accent. */
+    --navy-900: #f7f7f8;
+    --navy-700: #ffffff;
+    --navy-500: #f1f2f3;
+    --cyan: #326b60;
+    --white: #262626;
+    --muted: #73777c;
+    --correct: #25845c;
+    --correct-bg: #edf7f0;
+    --wrong: #b65d4d;
+    --wrong-bg: #fff2ee;
+    --lilac: #5f746e;
+    --radius: 14px;
+    --gap: 14px;
+    --font: "Segoe UI", "Be Vietnam Pro", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+
+  /* Thin, understated scrollbars: supported in Firefox and Chromium/Safari. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #c9cdd1 transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background-color: #c9cdd1;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background-color: #a5aaaf; }
+  *::-webkit-scrollbar-corner { background: transparent; }
+
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: var(--font);
+    color: var(--white);
+    background: #f7f7f8;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  .app { max-width: 820px; margin: 0 auto; padding: 20px 16px 48px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: #5d6b67; font-weight: 600; margin-bottom: 14px; letter-spacing: 0; }
+  .screen[hidden] { display: none; }
+  .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius);
+    padding: clamp(16px, 4vw, 28px);
+    margin-bottom: var(--gap);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.025);
+  }
+  h1 { font-size: clamp(1.7rem, 6vw, 2.6rem); line-height: 1.18; margin: 0 0 8px; letter-spacing: -0.025em; }
+  h2 { font-size: clamp(1.15rem, 3.5vw, 1.5rem); margin: 0 0 12px; line-height: 1.3; }
+  h3 { font-size: 1.05rem; margin: 0 0 8px; color: var(--cyan); }
+  .subtitle { color: var(--cyan); font-size: 1.08rem; margin: 0 0 16px; }
+  .muted { color: var(--muted); }
+  .hero { display: grid; grid-template-columns: 1fr 190px; gap: 16px; align-items: center; }
+  .hero svg { width: 100%; height: auto; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  .chip { background: #f4f7f6; color: #4c625c; border: 1px solid #e5e9e7; border-radius: 999px; padding: 4px 11px; font-size: 0.9rem; }
+
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .btn {
+    background: #326b60; color: #ffffff; border: 1px solid #326b60; border-radius: 10px;
+    padding: 11px 20px; font-weight: 600; min-height: 44px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn:hover { background: #28594f; border-color: #28594f; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.secondary { background: #ffffff; color: #303437; border: 1px solid #d9dcdf; }
+  .btn.secondary:hover { background: #f7f7f8; }
+  .btn.danger { background: #ffffff; color: #a84e41; border: 1px solid #ead0ca; }
+  .btn.danger:hover { background: #fff7f5; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .screen-nav { display: flex; justify-content: flex-start; margin-bottom: 12px; }
+  :focus-visible { outline: 2px solid #70a69a; outline-offset: 3px; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+    padding: 20px; background: rgba(28, 32, 31, 0.32); backdrop-filter: blur(2px);
+  }
+  .modal-overlay[hidden] { display: none; }
+  .confirm-dialog {
+    width: min(100%, 420px); padding: 24px; background: #fff; color: var(--white);
+    border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
+  }
+  .confirm-dialog h2 { margin-bottom: 8px; }
+  .confirm-dialog p { margin: 0; color: var(--muted); }
+  .confirm-dialog .actions { justify-content: flex-end; }
+  .btn.warning { background: #a84e41; color: #fff; border-color: #a84e41; }
+  .btn.warning:hover { background: #8e4036; border-color: #8e4036; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat { background: #f8f9f9; border: 1px solid #eceeef; border-radius: 10px; padding: 12px; }
+  .stat b { display: block; font-size: 1.35rem; color: var(--white); }
+  .stat span { color: var(--muted); font-size: 0.88rem; }
+  ol.board { margin: 8px 0 0; padding-left: 22px; }
+  .notice { background: var(--wrong-bg); border: 1px solid #e8b5a9; border-radius: 12px; padding: 10px 14px; margin-bottom: var(--gap); font-size: 0.95rem; }
+
+  .quiz-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 650; flex-wrap: wrap; }
+  .progress { height: 6px; background: #e9ebed; border-radius: 999px; overflow: hidden; margin: 10px 0 18px; }
+  .progress-bar { height: 100%; width: 0; background: #6b9b8f; border-radius: inherit; transition: width 0.35s ease; }
+  .topic-tag { display: inline-block; color: #637a73; font-size: 0.88rem; margin-bottom: 6px; }
+  .question-text { font-size: clamp(1.1rem, 3.6vw, 1.4rem); margin: 0 0 16px; outline: none; }
+  .options { display: grid; gap: 10px; }
+  .option {
+    display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%;
+    min-height: 56px; padding: 12px 14px; border-radius: 12px;
+    background: #ffffff; border: 1px solid #e1e4e7;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .option:hover:not(:disabled) { border-color: #91b7ad; background: #f8fbfa; }
+  .option:disabled { cursor: default; color: var(--white); }
+  .option-letter { flex: 0 0 30px; height: 30px; border-radius: 8px; background: #f0f2f2; color: #4c5c57; display: grid; place-items: center; font-weight: 600; }
+  .option-text { flex: 1; padding-top: 3px; overflow-wrap: anywhere; }
+  .option-mark { font-weight: 700; padding-top: 3px; white-space: nowrap; }
+  .option.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .option.incorrect { border-color: var(--wrong); background: var(--wrong-bg); }
+  .feedback { margin-top: 16px; padding: 14px 16px; border-radius: 10px; border-left: 3px solid; animation: fade 0.25s; }
+  .feedback.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .feedback.incorrect { border-color: var(--wrong); background: var(--wrong-bg); }
+  .feedback strong { display: block; margin-bottom: 4px; font-size: 1.05rem; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .score-big { font-size: clamp(2.4rem, 10vw, 3.6rem); font-weight: 800; color: var(--cyan); line-height: 1; }
+  .review-item { border-left: 3px solid; padding: 12px 14px; margin-bottom: 12px; border-radius: 8px; background: #f8f9f9; }
+  .review-item.correct { border-color: var(--correct); }
+  .review-item.incorrect { border-color: var(--wrong); }
+  .review-item p { margin: 4px 0; overflow-wrap: anywhere; }
+
+  @media (max-width: 560px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero svg { max-width: 170px; margin: 0 auto; }
+    .app { padding-top: 14px; }
+    .card { padding: 18px; }
+    .option { padding: 12px; }
+    .option-mark { white-space: normal; text-align: right; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  .bubble { animation: rise 3.5s ease-in infinite; }
+  .bubble:nth-child(2) { animation-delay: 1.2s; }
+  .bubble:nth-child(3) { animation-delay: 2.2s; }
+  @keyframes rise { 0% { transform: translateY(0); opacity: 0.9; } 100% { transform: translateY(-40px); opacity: 0; } }
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="brand" aria-hidden="true">Hóa học 11</div>
+
+  <!-- Màn hình 1: Trang bắt đầu -->
+  <section id="screen-start" class="screen">
+    <div class="card hero">
+      <div>
+        <h1>GIẢI MÃ NH₃ &amp; MUỐI AMMONIUM</h1>
+        <p class="subtitle">Khám phá phản ứng – Chinh phục Hóa học 11</p>
+        <div class="actions"><button id="btnStart" class="btn" type="button">Bắt đầu</button></div>
+      </div>
+      <svg viewBox="0 0 200 220" role="img" aria-label="Bình tam giác chứa dung dịch có bong bóng khí và mô hình phân tử NH₃">
+        <path d="M80 20h40v50l50 100a14 14 0 0 1-13 20H43a14 14 0 0 1-13-20L80 70z" fill="none" stroke="#9aa9a4" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M55 135h90l25 35a14 14 0 0 1-13 20H43a14 14 0 0 1-13-20z" fill="#b5d5cd" opacity="0.85"/>
+        <circle class="bubble" cx="85" cy="160" r="6" fill="#f8fbff"/>
+        <circle class="bubble" cx="110" cy="165" r="4" fill="#f8fbff"/>
+        <circle class="bubble" cx="130" cy="158" r="5" fill="#f8fbff"/>
+        <g transform="translate(150 45)">
+          <line x1="0" y1="0" x2="-22" y2="24" stroke="#9aa9a4" stroke-width="3"/>
+          <line x1="0" y1="0" x2="22" y2="24" stroke="#9aa9a4" stroke-width="3"/>
+          <line x1="0" y1="0" x2="0" y2="34" stroke="#9aa9a4" stroke-width="3"/>
+          <circle cx="0" cy="0" r="13" fill="#4b897d"/><text x="0" y="5" font-size="13" font-weight="700" text-anchor="middle" fill="#203b38">N</text>
+          <circle cx="-22" cy="26" r="8" fill="#edf4f1" stroke="#719087" stroke-width="1.5"/><circle cx="22" cy="26" r="8" fill="#edf4f1" stroke="#719087" stroke-width="1.5"/><circle cx="0" cy="38" r="8" fill="#edf4f1" stroke="#719087" stroke-width="1.5"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h2>Thống kê học tập của bạn</h2>
+      <p id="statsEmpty" class="muted">Bạn chưa hoàn thành lượt chơi nào.</p>
+      <div id="statsContent" hidden>
+        <div class="stat-grid" id="statGrid"></div>
+        <h3 style="margin-top:14px">Chủ đề cần ôn thêm</h3>
+        <p id="statsWeak" class="muted"></p>
+        <h3>Lịch sử chơi</h3>
+        <ol id="statsBoard" class="board"></ol>
+      </div>
+      <div class="actions"><button id="btnClearStats" class="btn danger" type="button">Xóa thống kê</button></div>
+    </div>
+  </section>
+
+  <!-- Màn hình 2: Hướng dẫn -->
+  <section id="screen-guide" class="screen" hidden>
+    <div class="screen-nav">
+      <button id="btnGuideBack" class="btn secondary" type="button">← Về menu chính</button>
+    </div>
+    <div class="card">
+      <h2>Hướng dẫn chơi</h2>
+      <ul>
+        <li>Mỗi câu có 4 phương án A, B, C, D và chỉ một đáp án đúng. Bạn có thể bấm chuột, chạm màn hình hoặc nhấn phím 1–4.</li>
+        <li>Mỗi lượt chơi chọn ngẫu nhiên 15 câu từ ngân hàng 30 câu; không lặp câu trong cùng lượt. Mỗi câu đúng được 10 điểm, câu sai được 0 điểm.</li>
+        <li>Sau khi chọn, đáp án bị khóa. Game hiện đúng/sai, đáp án chính xác và lời giải thích có phương trình hóa học.</li>
+        <li>Không thể bỏ qua câu hỏi: hãy trả lời rồi mới sang câu tiếp theo.</li>
+        <li>Cuối lượt, bạn xem được kết quả, chủ đề cần ôn và có thể xem lại từng câu.</li>
+      </ul>
+      <div class="actions">
+        <button id="btnEnterLab" class="btn" type="button">Vào phòng thí nghiệm</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Màn hình 3: Câu hỏi -->
+  <section id="screen-quiz" class="screen" hidden>
+    <div class="screen-nav">
+      <button id="btnQuizMenu" class="btn secondary" type="button">← Về menu chính</button>
+    </div>
+    <div class="card">
+      <div class="quiz-head">
+        <span id="quizCounter">Câu 1/15</span>
+        <span id="quizScore">Đúng: 0</span>
+        <span id="quizPoints">Điểm: 0</span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0" id="progressTrack">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <span id="quizTopic" class="topic-tag"></span>
+      <h2 id="quizQuestion" class="question-text" tabindex="-1"></h2>
+      <div id="quizOptions" class="options" role="group" aria-label="Các phương án trả lời"></div>
+      <div id="quizFeedback" class="feedback" role="status" aria-live="polite" hidden></div>
+      <div class="actions"><button id="btnNext" class="btn" type="button" hidden>Câu tiếp theo</button></div>
+    </div>
+  </section>
+
+  <!-- Màn hình 4: Kết quả -->
+  <section id="screen-result" class="screen" hidden>
+    <div class="card">
+      <h2>Kết quả lượt chơi</h2>
+      <div class="score-big"><span id="resultScore">0</span><span id="resultMaxScore" class="muted" style="font-size:1.2rem"> / 150 điểm</span></div>
+      <div class="stat-grid" id="resultGrid" style="margin:16px 0"></div>
+      <p id="resultComment"></p>
+      <h3>Chủ đề nên ôn tập thêm</h3>
+      <ul id="resultWeak"></ul>
+      <div class="actions">
+        <button id="btnReview" class="btn" type="button">Xem lại câu trả lời</button>
+        <button id="btnReplay" class="btn secondary" type="button">Chơi lại</button>
+        <button id="btnResultMenu" class="btn secondary" type="button">Về menu chính</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Màn hình 5: Xem lại -->
+  <section id="screen-review" class="screen" hidden>
+    <div class="card">
+      <h2>Xem lại câu trả lời</h2>
+      <div id="reviewList"></div>
+      <div class="actions">
+        <button id="btnReviewBack" class="btn secondary" type="button">Về màn hình kết quả</button>
+        <button id="btnReviewReplay" class="btn" type="button">Chơi lại</button>
+        <button id="btnReviewMenu" class="btn secondary" type="button">Về menu chính</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="leaveQuizModal" class="modal-overlay" hidden>
+  <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="leaveQuizTitle" aria-describedby="leaveQuizDescription">
+    <h2 id="leaveQuizTitle">Rời lượt chơi?</h2>
+    <p id="leaveQuizDescription">Tiến trình lượt chơi hiện tại sẽ bị mất và không được lưu.</p>
+    <div class="actions">
+      <button id="btnCancelLeave" class="btn secondary" type="button">Ở lại</button>
+      <button id="btnConfirmLeave" class="btn warning" type="button">Rời lượt chơi</button>
+    </div>
+  </section>
+</div>
+
+<!-- Âm thanh được tạo trực tiếp bằng Web Audio API, không cần tải tệp ngoài. -->
+
+<script>
+(() => {
+  'use strict';
+
+  /* ================= DỮ LIỆU CÂU HỎI (sửa bộ câu hỏi tại đây) =================
+     correctAnswer: chỉ số 0–3 tương ứng A–D. */
+  const TOPICS = {
+    structure: 'Cấu tạo và tính chất vật lí của NH₃',
+    base: 'Tính base và phản ứng đặc trưng của NH₃',
+    reducing: 'Tính khử của NH₃',
+    salt: 'Muối ammonium và nhận biết ion NH₄⁺',
+    applied: 'Sản xuất, ứng dụng và vận dụng'
+  };
+
+  const QUESTION_BANK = [
+    { id: 'q01', topic: 'structure', difficulty: 'Nhận biết',
+      question: 'Phân tử NH₃ có dạng hình học nào?',
+      options: ['Đường thẳng', 'Chữ V (gấp khúc)', 'Chóp tam giác', 'Tứ diện đều'],
+      correctAnswer: 2,
+      explanation: 'Nguyên tử nitrogen liên kết với 3 nguyên tử hydrogen và còn một cặp electron không liên kết, nên phân tử NH₃ có dạng chóp tam giác.' },
+    { id: 'q02', topic: 'structure', difficulty: 'Thông hiểu',
+      question: 'Nguyên nhân chính khiến NH₃ tan rất nhiều trong nước là gì?',
+      options: ['Phân tử NH₃ tạo được liên kết hydrogen với phân tử nước', 'NH₃ là hợp chất ion nên dễ phân li trong nước', 'Phân tử NH₃ không phân cực nên hòa lẫn với nước', 'NH₃ tác dụng với nước tạo kết tủa tan được'],
+      correctAnswer: 0,
+      explanation: 'Liên kết N–H phân cực (H mang một phần điện tích dương) và N còn cặp electron không liên kết, nên NH₃ tạo liên kết hydrogen với nước và cả với nhau (vì vậy NH₃ dễ hóa lỏng).' },
+    { id: 'q03', topic: 'structure', difficulty: 'Nhận biết',
+      question: 'Phát biểu nào đúng về tính chất vật lí của ammonia ở điều kiện thường?',
+      options: ['Là chất lỏng không màu, nặng hơn nước', 'Là khí màu vàng lục, nặng hơn không khí', 'Là khí không màu, không mùi, ít tan trong nước', 'Là khí không màu, nhẹ hơn không khí, mùi khai và xốc, tan nhiều trong nước'],
+      correctAnswer: 3,
+      explanation: 'Theo sách giáo khoa, 1 lít nước hòa tan được khoảng 700 lít khí NH₃ ở điều kiện thường; NH₃ hóa lỏng ở –33,3 °C.' },
+    { id: 'q04', topic: 'base', difficulty: 'Nhận biết',
+      question: 'Nhúng giấy quỳ tím và dung dịch phenolphthalein vào dung dịch ammonia, hiện tượng quan sát được là:',
+      options: ['Quỳ tím hóa đỏ, phenolphthalein không màu', 'Quỳ tím hóa xanh, phenolphthalein chuyển màu hồng', 'Quỳ tím không đổi màu, phenolphthalein hóa hồng', 'Quỳ tím hóa xanh, phenolphthalein không đổi màu'],
+      correctAnswer: 1,
+      explanation: 'Dung dịch ammonia có môi trường base yếu do NH₃ + H₂O ⇌ NH₄⁺ + OH⁻, làm quỳ tím chuyển xanh và phenolphthalein chuyển hồng.' },
+    { id: 'q05', topic: 'base', difficulty: 'Thông hiểu',
+      question: 'Phương trình nào biểu diễn đúng sự nhận proton của NH₃ khi tan trong nước?',
+      options: ['NH₃ + H₂O → NO + H₂', 'NH₃ + H₂O ⇌ NH₄⁺ + OH⁻', 'NH₃ + H₂O ⇌ NH₄⁺ + H⁺', 'NH₃ + H₂O ⇌ NH₂⁻ + H₃O⁺'],
+      correctAnswer: 1,
+      explanation: 'NH₃ nhận H⁺ của nước tạo NH₄⁺, phần còn lại của nước là OH⁻. Vì vậy NH₃ là base Brønsted–Lowry và dung dịch có OH⁻ (cân bằng, base yếu).' },
+    { id: 'q06', topic: 'base', difficulty: 'Vận dụng',
+      question: 'Cho NH₃ tác dụng với H₃PO₄ theo tỉ lệ mol 2 : 1, sản phẩm chính thu được là:',
+      options: ['NH₄H₂PO₄', '(NH₄)₂HPO₄', '(NH₄)₃PO₄', 'NH₄PO₄'],
+      correctAnswer: 1,
+      explanation: '2NH₃ + H₃PO₄ → (NH₄)₂HPO₄. Khi tỉ lệ NH₃ : H₃PO₄ = 1 : 1 thì tạo NH₄H₂PO₄. Hai muối này là thành phần chính của phân ammophos.' },
+    { id: 'q07', topic: 'base', difficulty: 'Thông hiểu',
+      question: 'Cho khí NH₃ tiếp xúc với khí HCl, hiện tượng quan sát được là gì?',
+      options: ['Xuất hiện khói trắng do tạo thành tinh thể NH₄Cl', 'Xuất hiện khí màu nâu đỏ', 'Xuất hiện kết tủa màu vàng', 'Có ngọn lửa màu vàng'],
+      correctAnswer: 0,
+      explanation: 'NH₃(g) + HCl(g) → NH₄Cl(s). Các hạt NH₄Cl rắn nhỏ li ti lơ lửng trong không khí nhìn như khói trắng.' },
+    { id: 'q08', topic: 'reducing', difficulty: 'Nhận biết',
+      question: 'Vì sao NH₃ thể hiện tính khử?',
+      options: ['Vì NH₃ có tính base yếu', 'Vì nitrogen trong NH₃ có số oxi hóa –3, là số oxi hóa thấp nhất của nitrogen', 'Vì NH₃ tan nhiều trong nước', 'Vì NH₃ có dạng hình chóp tam giác'],
+      correctAnswer: 1,
+      explanation: 'Nitrogen ở mức oxi hóa thấp nhất (–3) chỉ có thể tăng số oxi hóa, nên NH₃ nhường electron và đóng vai trò chất khử, ví dụ 4NH₃ + 3O₂ → 2N₂ + 6H₂O (t°).' },
+    { id: 'q09', topic: 'reducing', difficulty: 'Vận dụng',
+      question: 'Trong công nghiệp, ở 800 °C – 900 °C với xúc tác Pt (giai đoạn sản xuất nitric acid theo phương pháp Ostwald), NH₃ phản ứng với O₂ theo phương trình nào?',
+      options: ['4NH₃ + 3O₂ → 2N₂ + 6H₂O', '4NH₃ + 7O₂ → 4NO₂ + 6H₂O', '2NH₃ → N₂ + 3H₂', '4NH₃ + 5O₂ → 4NO + 6H₂O'],
+      correctAnswer: 3,
+      explanation: 'Với xúc tác Pt, NH₃ bị oxi hóa thành NO: 4NH₃ + 5O₂ → 4NO + 6H₂O (N: –3 → +2). Phản ứng tạo N₂ xảy ra khi đốt NH₃ trong oxygen, không phải điều kiện có Pt này.' },
+    { id: 'q10', topic: 'salt', difficulty: 'Nhận biết',
+      question: 'Phát biểu nào đúng về tính tan và sự điện li của các muối ammonium?',
+      options: ['Hầu hết đều tan kém trong nước', 'Hầu hết dễ tan trong nước và phân li hoàn toàn ra ion', 'Tan trong nước nhưng chỉ phân li một phần', 'Không tan trong nước nhưng tan trong kiềm'],
+      correctAnswer: 1,
+      explanation: 'Ví dụ: NH₄Cl → NH₄⁺ + Cl⁻. Muối ammonium là chất điện li mạnh.' },
+    { id: 'q11', topic: 'salt', difficulty: 'Thông hiểu',
+      question: 'Để nhận biết ion NH₄⁺ trong dung dịch phân đạm, cách làm nào đúng?',
+      options: ['Thêm dung dịch HCl, thấy xuất hiện kết tủa trắng', 'Thêm dung dịch NaCl, thấy có khí thoát ra', 'Đun nóng nhẹ với dung dịch NaOH, khí mùi khai thoát ra làm giấy pH ẩm chuyển sang môi trường base', 'Đun với dung dịch HNO₃, thấy khí màu nâu đỏ'],
+      correctAnswer: 2,
+      explanation: 'NH₄⁺ + OH⁻ → NH₃↑ + H₂O (t°). Khí NH₃ có mùi khai, làm giấy pH ẩm đổi màu về phía base. Ống đựng phân potassium nitrate (không có NH₄⁺) không cho hiện tượng này.' },
+    { id: 'q12', topic: 'salt', difficulty: 'Thông hiểu',
+      question: 'Phương trình ion rút gọn nào đúng cho phản ứng của muối ammonium với dung dịch kiềm khi đun nóng?',
+      options: ['NH₄⁺ + OH⁻ → NH₄OH↓', 'NH₄⁺ + 2OH⁻ → NH₃ + 2H₂O', 'NH₄⁺ + OH⁻ → NH₃ + H₂O', 'NH₃ + OH⁻ → NH₄⁺ + H₂O'],
+      correctAnswer: 2,
+      explanation: 'NH₄⁺ nhường H⁺ cho OH⁻ tạo NH₃ và H₂O. Ví dụ: (NH₄)₂SO₄ + 2NaOH → Na₂SO₄ + 2NH₃ + 2H₂O (t°). Phương trình ở các phương án khác không bảo toàn nguyên tố hoặc điện tích, hoặc sai chiều phản ứng.' },
+    { id: 'q13', topic: 'salt', difficulty: 'Vận dụng',
+      question: 'Phát biểu nào đúng về sự phân hủy nhiệt của muối ammonium?',
+      options: ['Muối ammonium bền nhiệt, không bị phân hủy khi nung', 'Mọi muối ammonium khi nung đều chỉ tạo N₂ và H₂O', 'Mọi muối ammonium khi nung đều tạo NH₃ và acid tương ứng', 'Muối ammonium kém bền nhiệt; sản phẩm phân hủy phụ thuộc vào từng muối'],
+      correctAnswer: 3,
+      explanation: 'Ví dụ: NH₄Cl → NH₃ + HCl; NH₄HCO₃ → NH₃ + CO₂ + H₂O; NH₄NO₃ → N₂O + 2H₂O. Sản phẩm khác nhau tùy gốc acid.' },
+    { id: 'q14', topic: 'applied', difficulty: 'Vận dụng',
+      question: 'Phản ứng N₂(g) + 3H₂(g) ⇌ 2NH₃(g) có ΔrH° = –91,8 kJ. Nếu tăng nhiệt độ lên cao hơn nhiều so với 400 °C – 450 °C thì:',
+      options: ['Tốc độ phản ứng tăng và cân bằng chuyển dịch theo chiều thuận', 'Tốc độ phản ứng giảm và cân bằng chuyển dịch theo chiều thuận', 'Tốc độ phản ứng tăng nhưng cân bằng chuyển dịch theo chiều nghịch, hiệu suất tạo NH₃ giảm', 'Cân bằng không bị ảnh hưởng bởi nhiệt độ'],
+      correctAnswer: 2,
+      explanation: 'Phản ứng thuận tỏa nhiệt (ΔrH° < 0). Tăng nhiệt độ làm tăng tốc độ nhưng cân bằng chuyển dịch theo chiều thu nhiệt (chiều nghịch). Vì vậy chọn 400 °C – 450 °C (kèm xúc tác Fe) để dung hòa tốc độ và hiệu suất.' },
+    { id: 'q15', topic: 'applied', difficulty: 'Vận dụng',
+      question: 'Từ ammonium sản xuất phân đạm chứa ion NH₄⁺ (ví dụ NH₄NO₃) bằng phản ứng nào, và NH₃ đóng vai trò gì?',
+      options: ['Phản ứng với NaOH; NH₃ là acid', 'Phản ứng cháy trong O₂; NH₃ là chất khử', 'Phản ứng với acid, ví dụ NH₃ + HNO₃ → NH₄NO₃; NH₃ là base (nhận proton)', 'Phản ứng nhiệt phân; NH₃ là chất oxi hóa'],
+      correctAnswer: 2,
+      explanation: 'NH₃ nhận proton H⁺ từ acid tạo ion NH₄⁺ trong muối ammonium: NH₃ + HNO₃ → NH₄NO₃; 2NH₃ + H₂SO₄ → (NH₄)₂SO₄.' },
+    { id: 'q16', topic: 'structure', difficulty: 'Nhận biết',
+      question: 'Khối lượng mol của ammonia (NH₃) là bao nhiêu?',
+      options: ['14 g/mol', '16 g/mol', '17 g/mol', '18 g/mol'],
+      correctAnswer: 2,
+      explanation: 'M(NH₃) = 14 + 3 × 1 = 17 g/mol.' },
+    { id: 'q17', topic: 'structure', difficulty: 'Thông hiểu',
+      question: 'Trong phòng thí nghiệm, cách thu khí NH₃ phù hợp là gì?',
+      options: ['Thu bằng cách đẩy nước vì NH₃ ít tan', 'Thu bằng cách đẩy không khí vì NH₃ nhẹ hơn không khí và tan rất nhiều trong nước', 'Thu bằng cách hóa lỏng ở nhiệt độ phòng', 'Không thể thu khí NH₃ bằng bất kì phương pháp nào'],
+      correctAnswer: 1,
+      explanation: 'NH₃ nhẹ hơn không khí nhưng tan rất nhiều trong nước, nên không thu bằng phương pháp đẩy nước; có thể thu bằng cách đẩy không khí.' },
+    { id: 'q18', topic: 'structure', difficulty: 'Vận dụng',
+      question: 'Chất nào thích hợp để làm khô khí NH₃?',
+      options: ['H₂SO₄ đặc', 'P₂O₅', 'CaCl₂ khan', 'CaO rắn'],
+      correctAnswer: 3,
+      explanation: 'CaO hút nước mà không phản ứng với NH₃ trong điều kiện làm khô. Các chất có tính acid như H₂SO₄ đặc và P₂O₅ phản ứng với NH₃; CaCl₂ khan cũng không thích hợp vì có thể hấp thụ NH₃.' },
+    { id: 'q19', topic: 'reducing', difficulty: 'Thông hiểu',
+      question: 'Khi dẫn NH₃ qua CuO nung nóng, sản phẩm nào được tạo thành?',
+      options: ['Cu, N₂ và H₂O', 'CuO, N₂ và H₂', 'CuSO₄ và NH₄OH', 'Cu, NO₂ và H₂'],
+      correctAnswer: 0,
+      explanation: 'Phương trình: 2NH₃ + 3CuO → N₂ + 3Cu + 3H₂O. NH₃ khử CuO thành Cu; nitrogen trong NH₃ bị oxi hóa thành N₂.' },
+    { id: 'q20', topic: 'applied', difficulty: 'Vận dụng',
+      question: 'Theo phương trình N₂ + 3H₂ ⇌ 2NH₃, nếu 1 mol N₂ phản ứng vừa đủ với 3 mol H₂ và phản ứng hoàn toàn, lượng NH₃ tối đa thu được là bao nhiêu?',
+      options: ['1 mol', '2 mol', '3 mol', '4 mol'],
+      correctAnswer: 1,
+      explanation: 'Theo hệ số phương trình, 1 mol N₂ phản ứng với 3 mol H₂ tạo 2 mol NH₃.' },
+    { id: 'q21', topic: 'applied', difficulty: 'Thông hiểu',
+      question: 'Với cân bằng N₂(g) + 3H₂(g) ⇌ 2NH₃(g), khi tăng áp suất ở nhiệt độ không đổi, cân bằng chuyển dịch theo chiều nào?',
+      options: ['Chiều nghịch, vì phía trái có ít mol khí hơn', 'Không chuyển dịch', 'Chiều thuận, vì phía phải có ít mol khí hơn', 'Chiều chuyển dịch chỉ phụ thuộc vào xúc tác'],
+      correctAnswer: 2,
+      explanation: 'Phía trái có tổng 4 mol khí theo hệ số phương trình, còn phía phải có 2 mol khí. Tăng áp suất làm cân bằng chuyển dịch về phía có ít mol khí hơn, tức chiều tạo NH₃.' },
+    { id: 'q22', topic: 'applied', difficulty: 'Thông hiểu',
+      question: 'Vai trò của xúc tác sắt trong quá trình tổng hợp NH₃ là gì?',
+      options: ['Làm cân bằng chuyển dịch hoàn toàn sang phía NH₃', 'Làm tăng tốc độ đạt cân bằng nhưng không làm thay đổi vị trí cân bằng', 'Làm phản ứng thuận trở thành phản ứng thu nhiệt', 'Làm tăng lượng chất phản ứng sau khi cân bằng'],
+      correctAnswer: 1,
+      explanation: 'Xúc tác làm tăng tốc độ cả phản ứng thuận và nghịch, giúp hệ đạt cân bằng nhanh hơn; xúc tác không làm thay đổi hằng số hay vị trí cân bằng.' },
+    { id: 'q23', topic: 'salt', difficulty: 'Thông hiểu',
+      question: 'Phương trình nào mô tả đúng sự tương tác của ion NH₄⁺ với nước?',
+      options: ['NH₄⁺ + H₂O ⇌ NH₃ + H₃O⁺', 'NH₄⁺ + H₂O → NH₂⁻ + H₃O⁺', 'NH₄⁺ + OH⁻ → NH₄OH↓', 'NH₄⁺ → N₂ + 4H⁺'],
+      correctAnswer: 0,
+      explanation: 'NH₄⁺ có thể nhường proton cho H₂O, tạo NH₃ và H₃O⁺. Đây là một nguyên nhân khiến dung dịch chứa ion NH₄⁺ có thể có môi trường acid.' },
+    { id: 'q24', topic: 'salt', difficulty: 'Nhận biết',
+      question: 'Công thức hóa học đúng của muối ammonium chứa ion carbonate CO₃²⁻ là gì?',
+      options: ['NH₄CO₃', '(NH₄)₂CO₃', 'NH₄(CO₃)₂', 'NH₃CO₃'],
+      correctAnswer: 1,
+      explanation: 'Ion NH₄⁺ mang điện tích +1 và ion CO₃²⁻ mang điện tích −2, nên cần hai ion NH₄⁺ cho mỗi ion CO₃²⁻: (NH₄)₂CO₃.' },
+    { id: 'q25', topic: 'applied', difficulty: 'Nhận biết',
+      question: 'Một ứng dụng của ammonia trong công nghiệp lạnh là gì?',
+      options: ['Dùng làm chất làm lạnh trong một số hệ thống lạnh công nghiệp', 'Dùng làm chất xúc tác sắt trong tổng hợp NH₃', 'Dùng để tạo oxygen từ nước', 'Dùng để làm tăng nhiệt độ sôi của mọi dung dịch'],
+      correctAnswer: 0,
+      explanation: 'Ammonia được dùng làm môi chất lạnh trong một số hệ thống công nghiệp nhờ đặc tính nhiệt động thuận lợi. Việc sử dụng cần hệ thống kín và biện pháp an toàn do NH₃ gây kích ứng, độc khi rò rỉ.' },
+    { id: 'q26', topic: 'structure', difficulty: 'Thông hiểu',
+      question: 'Trong thí nghiệm “đài phun ammonia”, vì sao nước bị hút nhanh vào bình chứa khí NH₃?',
+      options: ['NH₃ phản ứng với thủy tinh làm bình co lại', 'NH₃ tan rất nhanh trong nước, làm áp suất trong bình giảm', 'Nước tự sôi khi tiếp xúc với NH₃', 'NH₃ làm khối lượng nước bằng không'],
+      correctAnswer: 1,
+      explanation: 'NH₃ tan rất mạnh trong nước. Khi một phần lớn khí hòa tan, áp suất trong bình giảm, nên áp suất khí quyển đẩy nước vào bình.' },
+    { id: 'q27', topic: 'salt', difficulty: 'Nhận biết',
+      question: 'Để kiểm tra khí NH₃ thoát ra, có thể dùng giấy quỳ đỏ ẩm. Hiện tượng đúng là gì?',
+      options: ['Giấy quỳ đỏ chuyển xanh', 'Giấy quỳ đỏ chuyển đen', 'Giấy quỳ đỏ chuyển vàng', 'Giấy quỳ đỏ không bao giờ đổi màu trong NH₃'],
+      correctAnswer: 0,
+      explanation: 'NH₃ hòa tan vào lớp nước trên giấy quỳ ẩm tạo môi trường base, làm giấy quỳ đỏ chuyển xanh.' },
+    { id: 'q28', topic: 'applied', difficulty: 'Vận dụng',
+      question: 'Trong các chất NH₄NO₃, (NH₄)₂SO₄ và urea CO(NH₂)₂, chất nào có phần trăm khối lượng nitrogen lớn nhất? Cho M lần lượt là 80, 132 và 60 g/mol.',
+      options: ['NH₄NO₃', '(NH₄)₂SO₄', 'CO(NH₂)₂', 'Ba chất có phần trăm nitrogen bằng nhau'],
+      correctAnswer: 2,
+      explanation: 'NH₄NO₃: 28/80 = 35%; (NH₄)₂SO₄: 28/132 ≈ 21,2%; urea: 28/60 ≈ 46,7%. Vì vậy urea có phần trăm nitrogen lớn nhất trong ba chất.' },
+    { id: 'q29', topic: 'applied', difficulty: 'Nhận biết',
+      question: 'Khi cần nhận biết mùi khí NH₃ trong phòng thí nghiệm, thao tác an toàn là gì?',
+      options: ['Đưa mũi sát miệng bình và hít sâu', 'Nếm thử một lượng rất nhỏ', 'Dùng tay phẩy nhẹ một ít hơi về phía mũi từ khoảng cách an toàn, chỉ khi được hướng dẫn', 'Đun nóng bình kín rồi ngửi'],
+      correctAnswer: 2,
+      explanation: 'Không ngửi trực tiếp hóa chất. Trong thí nghiệm được hướng dẫn, nếu cần nhận biết mùi thì dùng tay phẩy nhẹ hơi về phía mũi từ khoảng cách an toàn; NH₃ có thể gây kích ứng và nguy hiểm khi hít phải.' },
+    { id: 'q30', topic: 'applied', difficulty: 'Thông hiểu',
+      question: 'Trong quy trình Haber - Bosch, nitrogen dùng để tổng hợp NH₃ thường được lấy từ đâu?',
+      options: ['Từ không khí', 'Từ dung dịch NaCl', 'Từ đá vôi', 'Từ nước tinh khiết bằng cách lọc'],
+      correctAnswer: 0,
+      explanation: 'Không khí chứa khoảng 78% nitrogen theo thể tích, nên là nguồn nguyên liệu phổ biến để tách N₂ phục vụ tổng hợp ammonia.' }
+  ];
+
+  let QUESTIONS = [];
+
+  /* ================= HẰNG SỐ ================= */
+  const TOTAL_QUESTIONS = 15;
+  const POINTS_PER_CORRECT = 10;
+  const MAX_SCORE = TOTAL_QUESTIONS * POINTS_PER_CORRECT;
+  const STORAGE_KEY = 'labquestStats';
+  const STORAGE_VERSION = 1;
+  const COOKIE_MAX_AGE = 180 * 24 * 60 * 60;
+  const BOARD_SIZE = 5;
+  const WEAK_THRESHOLD = 0.7;
+  const LETTERS = ['A', 'B', 'C', 'D'];
+
+  const $ = (id) => document.getElementById(id);
+
+  /* ================= TRẠNG THÁI LƯỢT CHƠI ================= */
+  const state = createInitialState();
+
+  function createInitialState() {
+    return { screen: 'start', index: 0, correctCount: 0, answers: [], answered: false,
+             startTime: 0, endTime: 0, finished: false, recorded: false };
+  }
+
+  function resetGame() {
+    Object.assign(state, createInitialState());
+    state.answers = new Array(QUESTIONS.length).fill(null);
+  }
+
+  /* ================= KIỂM TRA DỮ LIỆU ================= */
+  function validateQuestions() {
+    if (QUESTION_BANK.length < TOTAL_QUESTIONS) return false;
+    const ids = new Set();
+    return QUESTION_BANK.every((q) => {
+      const valid = q.id && !ids.has(q.id) && q.question && q.explanation && TOPICS[q.topic] && q.difficulty &&
+        Array.isArray(q.options) && q.options.length === 4 && q.options.every(Boolean) &&
+        Number.isInteger(q.correctAnswer) && q.correctAnswer >= 0 && q.correctAnswer < 4;
+      ids.add(q.id);
+      return valid;
+    });
+  }
+
+  /* ================= LƯU TRỮ (cookies + localStorage dự phòng) ================= */
+  function defaultStats() {
+    const topics = {};
+    Object.keys(TOPICS).forEach((key) => { topics[key] = { correct: 0, total: 0 }; });
+    return { version: STORAGE_VERSION, savedAt: 0, plays: 0, answered: 0, correct: 0, wrong: 0, best: 0,
+             last: null, topics, board: [] };
+  }
+
+  const toCount = (value) => (Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0);
+
+  // Làm sạch dữ liệu đọc từ bộ nhớ; trả về null nếu không hợp lệ.
+  function sanitizeStats(raw) {
+    if (!raw || typeof raw !== 'object' || raw.version !== STORAGE_VERSION) return null;
+    const stats = defaultStats();
+    stats.savedAt = toCount(raw.savedAt);
+    ['plays', 'answered', 'correct', 'wrong', 'best'].forEach((key) => { stats[key] = toCount(raw[key]); });
+    if (raw.last && typeof raw.last === 'object') {
+      stats.last = { correct: toCount(raw.last.correct), date: toCount(raw.last.date) };
+    }
+    Object.keys(TOPICS).forEach((key) => {
+      const t = raw.topics && raw.topics[key];
+      if (t) stats.topics[key] = { correct: toCount(t.correct), total: toCount(t.total) };
+    });
+    if (Array.isArray(raw.board)) {
+      stats.board = raw.board.slice(0, BOARD_SIZE).map((e) => ({ correct: toCount(e && e.correct), date: toCount(e && e.date) }));
+    }
+    return stats;
+  }
+
+  function readFromCookie() {
+    try {
+      const match = document.cookie.split('; ').find((part) => part.startsWith(STORAGE_KEY + '='));
+      return match ? sanitizeStats(JSON.parse(decodeURIComponent(match.slice(STORAGE_KEY.length + 1)))) : null;
+    } catch (error) { return null; }
+  }
+
+  function readFromLocalStorage() {
+    try { return sanitizeStats(JSON.parse(localStorage.getItem(STORAGE_KEY))); } catch (error) { return null; }
+  }
+
+  function writeToCookie(json) {
+    try {
+      document.cookie = `${STORAGE_KEY}=${encodeURIComponent(json)}; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax`;
+      return document.cookie.includes(STORAGE_KEY + '=');
+    } catch (error) { return false; }
+  }
+
+  function writeToLocalStorage(json) {
+    try { localStorage.setItem(STORAGE_KEY, json); return true; } catch (error) { return false; }
+  }
+
+  // Lấy bản ghi hợp lệ mới nhất (theo savedAt) để không cộng dồn hai lần.
+  function loadStatistics() {
+    const candidates = [readFromCookie(), readFromLocalStorage()].filter(Boolean);
+    if (!candidates.length) return defaultStats();
+    return candidates.reduce((newest, item) => (item.savedAt > newest.savedAt ? item : newest));
+  }
+
+  // Trả về true nếu lưu được ít nhất một nơi.
+  function saveStatistics(stats) {
+    stats.savedAt = Date.now();
+    const json = JSON.stringify(stats);
+    const cookieOk = writeToCookie(json);
+    const localOk = writeToLocalStorage(json);
+    return cookieOk || localOk;
+  }
+
+  function clearStatistics() {
+    try { document.cookie = `${STORAGE_KEY}=; max-age=0; path=/; SameSite=Lax`; } catch (error) { /* bỏ qua */ }
+    try { localStorage.removeItem(STORAGE_KEY); } catch (error) { /* bỏ qua */ }
+  }
+
+  /* ================= ĐẾM CÂU ĐÚNG & THỐNG KÊ ================= */
+  function isCorrectAnswer(questionIndex) {
+    return state.answers[questionIndex] === QUESTIONS[questionIndex].correctAnswer;
+  }
+
+  function countCorrectAnswers() {
+    return QUESTIONS.reduce((sum, _q, i) => sum + (isCorrectAnswer(i) ? 1 : 0), 0);
+  }
+
+  function calculateTopicResults() {
+    const results = {};
+    Object.keys(TOPICS).forEach((key) => { results[key] = { correct: 0, total: 0 }; });
+    QUESTIONS.forEach((q, i) => {
+      results[q.topic].total += 1;
+      if (isCorrectAnswer(i)) results[q.topic].correct += 1;
+    });
+    return results;
+  }
+
+  function weakTopicsFrom(topicData) {
+    return Object.keys(TOPICS).filter((key) => topicData[key].total > 0 && topicData[key].correct / topicData[key].total < WEAK_THRESHOLD);
+  }
+
+  // Ghi nhận đúng một lần cho mỗi lượt chơi đã hoàn thành.
+  function recordGameResult() {
+    if (state.recorded) return;
+    state.recorded = true;
+    const stats = loadStatistics();
+    const correctCount = countCorrectAnswers();
+    const topicResults = calculateTopicResults();
+    stats.plays += 1;
+    stats.answered += QUESTIONS.length;
+    stats.correct += correctCount;
+    stats.wrong += QUESTIONS.length - correctCount;
+    stats.best = Math.max(stats.best, correctCount);
+    stats.last = { correct: correctCount, date: Date.now() };
+    Object.keys(TOPICS).forEach((key) => {
+      stats.topics[key].correct += topicResults[key].correct;
+      stats.topics[key].total += topicResults[key].total;
+    });
+    stats.board.push({ correct: correctCount, date: Date.now() });
+    stats.board.sort((a, b) => b.correct - a.correct || a.date - b.date);
+    stats.board = stats.board.slice(0, BOARD_SIZE);
+    saveStatistics(stats);
+  }
+
+  /* ================= TIỆN ÍCH GIAO DIỆN ================= */
+  function createEl(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function showScreen(name) {
+    state.screen = name;
+    document.querySelectorAll('.screen').forEach((section) => { section.hidden = section.id !== 'screen-' + name; });
+    window.scrollTo(0, 0);
+  }
+
+  function formatPercent(part, whole) { return whole > 0 ? Math.round((part / whole) * 100) + '%' : '0%'; }
+
+  function formatDuration(ms) {
+    const total = Math.max(0, Math.round(ms / 1000));
+    return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+  }
+
+  function formatDate(ms) { return ms ? new Date(ms).toLocaleDateString('vi-VN') : ''; }
+
+  function fillStatGrid(container, items) {
+    container.replaceChildren();
+    items.forEach(([value, label]) => {
+      const box = createEl('div', 'stat');
+      box.append(createEl('b', '', String(value)), createEl('span', '', label));
+      container.append(box);
+    });
+  }
+
+  /* ================= TRANG BẮT ĐẦU ================= */
+  function renderStatistics() {
+    const stats = loadStatistics();
+    const hasData = stats.plays > 0;
+    $('statsEmpty').hidden = hasData;
+    $('statsContent').hidden = !hasData;
+    $('btnClearStats').hidden = !hasData;
+    if (!hasData) return;
+    fillStatGrid($('statGrid'), [
+      [stats.plays, 'Lượt chơi'],
+      [stats.correct + '/' + stats.answered, 'Câu đúng / đã trả lời'],
+      [formatPercent(stats.correct, stats.answered), 'Tỉ lệ chính xác'],
+      [stats.best * POINTS_PER_CORRECT + '/' + MAX_SCORE, 'Điểm cao nhất'],
+      [stats.last ? stats.last.correct * POINTS_PER_CORRECT + '/' + MAX_SCORE + ' điểm' : 'Chưa có', 'Kết quả gần nhất']
+    ]);
+    const weak = weakTopicsFrom(stats.topics);
+    $('statsWeak').textContent = weak.length ? weak.map((key) => TOPICS[key]).join('; ') : 'Chưa có chủ đề nào dưới 70%. Hãy tiếp tục phát huy!';
+    const board = $('statsBoard');
+    board.replaceChildren();
+    stats.board.forEach((entry) => board.append(createEl('li', '', entry.correct * POINTS_PER_CORRECT + '/' + MAX_SCORE + ' điểm (' + formatDate(entry.date) + ')')));
+  }
+
+  function handleClearStats() {
+    if (!window.confirm('Bạn có chắc muốn xóa toàn bộ thống kê đã lưu? Hành động này không thể hoàn tác.')) return;
+    clearStatistics();
+    renderStatistics();
+  }
+
+  function backToMainMenu() {
+    renderStatistics();
+    showScreen('start');
+  }
+
+  let modalReturnFocus = null;
+
+  function openLeaveQuizModal() {
+    modalReturnFocus = document.activeElement;
+    $('leaveQuizModal').hidden = false;
+    $('btnCancelLeave').focus();
+  }
+
+  function closeLeaveQuizModal(restoreFocus = true) {
+    $('leaveQuizModal').hidden = true;
+    if (restoreFocus && modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
+    modalReturnFocus = null;
+  }
+
+  function requestQuizExit() {
+    if (state.screen === 'quiz') {
+      openLeaveQuizModal();
+      return;
+    }
+    backToMainMenu();
+  }
+
+  /* ================= LƯỢT CHƠI ================= */
+  function pickRandomQuestions(bank, count) {
+    // Fisher–Yates: shuffle a copy, then take the first count items.
+    const shuffled = bank.slice();
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, Math.min(count, shuffled.length));
+  }
+
+  function startGame() {
+    if (!validateQuestions()) {
+      window.alert('Dữ liệu ngân hàng câu hỏi không hợp lệ nên không thể bắt đầu. Hãy kiểm tra mảng QUESTION_BANK.');
+      return;
+    }
+    QUESTIONS = pickRandomQuestions(QUESTION_BANK, TOTAL_QUESTIONS);
+    resetGame();
+    state.startTime = Date.now();
+    showScreen('quiz');
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const question = QUESTIONS[state.index];
+    state.answered = false;
+    $('quizCounter').textContent = 'Câu ' + (state.index + 1) + '/' + QUESTIONS.length;
+    $('quizScore').textContent = 'Đúng: ' + state.correctCount;
+    $('quizPoints').textContent = 'Điểm: ' + (state.correctCount * POINTS_PER_CORRECT);
+    $('quizTopic').textContent = TOPICS[question.topic] + ' · ' + question.difficulty;
+    $('quizQuestion').textContent = question.question;
+    const done = state.index;
+    $('progressBar').style.width = (done / QUESTIONS.length) * 100 + '%';
+    $('progressTrack').setAttribute('aria-valuenow', String(done));
+
+    const optionsBox = $('quizOptions');
+    optionsBox.replaceChildren();
+    question.options.forEach((text, i) => {
+      const button = createEl('button', 'option');
+      button.type = 'button';
+      button.dataset.index = String(i);
+      button.append(createEl('span', 'option-letter', LETTERS[i]), createEl('span', 'option-text', text), createEl('span', 'option-mark'));
+      optionsBox.append(button);
+    });
+    $('quizFeedback').hidden = true;
+    $('btnNext').hidden = true;
+    $('quizQuestion').focus({ preventScroll: true });
+  }
+
+  function selectAnswer(chosenIndex) {
+    if (state.answered || state.finished || state.screen !== 'quiz') return;
+    state.answered = true;
+    state.answers[state.index] = chosenIndex;
+    state.correctCount = countCorrectAnswers();
+    showFeedback(chosenIndex);
+  }
+
+  let soundContext;
+
+  function playTone(frequency, duration, waveform, delay = 0, volume = 0.08) {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      if (!soundContext) soundContext = new AudioContextClass();
+      if (soundContext.state === 'suspended') {
+        const resumeResult = soundContext.resume();
+        if (resumeResult && typeof resumeResult.catch === 'function') resumeResult.catch(() => {});
+      }
+
+      const startTime = soundContext.currentTime + delay;
+      const oscillator = soundContext.createOscillator();
+      const gain = soundContext.createGain();
+
+      oscillator.type = waveform;
+      oscillator.frequency.setValueAtTime(frequency, startTime);
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.linearRampToValueAtTime(volume, startTime + 0.01);
+      gain.gain.setValueAtTime(volume, startTime + duration * 0.65);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      oscillator.connect(gain);
+      gain.connect(soundContext.destination);
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration + 0.02);
+    } catch (error) {
+      // Không làm gián đoạn game nếu trình duyệt không hỗ trợ âm thanh.
+    }
+  }
+
+  function playAnswerSound(isCorrect) {
+    if (isCorrect) {
+      playTone(523.25, 0.12, 'triangle', 0, 0.08);
+      playTone(659.25, 0.12, 'triangle', 0.1, 0.08);
+      playTone(783.99, 0.18, 'triangle', 0.2, 0.08);
+    } else {
+      playTone(200, 0.18, 'sawtooth', 0, 0.045);
+      playTone(140, 0.22, 'sawtooth', 0.1, 0.045);
+    }
+  }
+
+  function showFeedback(chosenIndex) {
+    const question = QUESTIONS[state.index];
+    const correct = chosenIndex === question.correctAnswer;
+    playAnswerSound(correct);
+    document.querySelectorAll('#quizOptions .option').forEach((button, i) => {
+      button.disabled = true;
+      const mark = button.querySelector('.option-mark');
+      if (i === question.correctAnswer) { button.classList.add('correct'); mark.textContent = '✔ Đáp án đúng'; }
+      else if (i === chosenIndex) { button.classList.add('incorrect'); mark.textContent = '✘ Bạn chọn'; }
+    });
+    const box = $('quizFeedback');
+    box.className = 'feedback ' + (correct ? 'correct' : 'incorrect');
+    box.replaceChildren(
+      createEl('strong', '', correct ? '✔ Chính xác! +10 điểm' : '✘ Chưa đúng. +0 điểm. Đáp án đúng là ' + LETTERS[question.correctAnswer] + '.'),
+      createEl('span', '', question.explanation)
+    );
+    box.hidden = false;
+    $('quizScore').textContent = 'Đúng: ' + state.correctCount;
+    $('quizPoints').textContent = 'Điểm: ' + (state.correctCount * POINTS_PER_CORRECT);
+    const isLast = state.index === QUESTIONS.length - 1;
+    $('progressBar').style.width = ((state.index + 1) / QUESTIONS.length) * 100 + '%';
+    $('progressTrack').setAttribute('aria-valuenow', String(state.index + 1));
+    $('btnNext').textContent = isLast ? 'Xem kết quả' : 'Câu tiếp theo';
+    $('btnNext').hidden = false;
+    $('btnNext').focus();
+  }
+
+  function goToNextQuestion() {
+    if (!state.answered || state.finished) return;
+    if (state.index < QUESTIONS.length - 1) {
+      state.index += 1;
+      renderQuestion();
+    } else {
+      finishGame();
+    }
+  }
+
+  function finishGame() {
+    if (state.finished) return;
+    state.finished = true;
+    state.endTime = Date.now();
+    state.correctCount = countCorrectAnswers();
+    recordGameResult();
+    renderResults();
+    showScreen('result');
+  }
+
+  /* ================= KẾT QUẢ & XEM LẠI ================= */
+  function buildComment(percent) {
+    if (percent === 100) return 'Xuất sắc! Bạn nắm vững kiến thức về NH₃ và muối ammonium.';
+    if (percent >= 80) return 'Rất tốt! Bạn chỉ cần xem lại một vài chi tiết nhỏ.';
+    if (percent >= 60) return 'Khá ổn. Hãy xem lại phần giải thích các câu sai để chắc kiến thức hơn.';
+    return 'Bạn cần ôn lại bài. Hãy đọc lại bài trong sách giáo khoa rồi thử chơi lại nhé.';
+  }
+
+  function renderResults() {
+    const correctCount = countCorrectAnswers();
+    const percent = Math.round((correctCount / QUESTIONS.length) * 100);
+    $('resultScore').textContent = String(correctCount * POINTS_PER_CORRECT);
+    $('resultMaxScore').textContent = ' / ' + MAX_SCORE + ' điểm';
+    fillStatGrid($('resultGrid'), [
+      [correctCount * POINTS_PER_CORRECT, 'Tổng điểm'],
+      [correctCount, 'Câu đúng'],
+      [QUESTIONS.length - correctCount, 'Câu sai'],
+      [percent + '%', 'Tỉ lệ chính xác'],
+      [formatDuration(state.endTime - state.startTime), 'Thời gian hoàn thành']
+    ]);
+    $('resultComment').textContent = buildComment(percent);
+    const weakList = $('resultWeak');
+    weakList.replaceChildren();
+    const weak = weakTopicsFrom(calculateTopicResults());
+    if (!weak.length) weakList.append(createEl('li', '', 'Không có chủ đề nào dưới 70%. Bạn làm rất tốt!'));
+    weak.forEach((key) => weakList.append(createEl('li', '', TOPICS[key])));
+  }
+
+  function renderReview() {
+    const list = $('reviewList');
+    list.replaceChildren();
+    QUESTIONS.forEach((q, i) => {
+      const correct = isCorrectAnswer(i);
+      const item = createEl('article', 'review-item ' + (correct ? 'correct' : 'incorrect'));
+      const chosen = state.answers[i];
+      item.append(
+        createEl('strong', '', 'Câu ' + (i + 1) + ': ' + (correct ? '✔ Đúng' : '✘ Sai')),
+        createEl('p', '', q.question),
+        createEl('p', '', 'Bạn chọn: ' + (chosen === null ? 'Chưa trả lời' : LETTERS[chosen] + '. ' + q.options[chosen])),
+        createEl('p', '', 'Đáp án đúng: ' + LETTERS[q.correctAnswer] + '. ' + q.options[q.correctAnswer]),
+        createEl('p', 'muted', 'Giải thích: ' + q.explanation)
+      );
+      list.append(item);
+    });
+  }
+
+  /* ================= SỰ KIỆN ================= */
+  function bindEvents() {
+    $('btnStart').addEventListener('click', () => showScreen('guide'));
+    $('btnGuideBack').addEventListener('click', backToMainMenu);
+    $('btnQuizMenu').addEventListener('click', requestQuizExit);
+    $('btnCancelLeave').addEventListener('click', closeLeaveQuizModal);
+    $('btnConfirmLeave').addEventListener('click', () => {
+      closeLeaveQuizModal(false);
+      backToMainMenu();
+    });
+    $('leaveQuizModal').addEventListener('click', (event) => {
+      if (event.target === $('leaveQuizModal')) closeLeaveQuizModal();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (!$('leaveQuizModal').hidden && event.key === 'Escape') {
+        event.preventDefault();
+        closeLeaveQuizModal();
+      }
+    });
+    $('btnResultMenu').addEventListener('click', backToMainMenu);
+    $('btnReviewMenu').addEventListener('click', backToMainMenu);
+    $('btnEnterLab').addEventListener('click', startGame);
+    $('btnClearStats').addEventListener('click', handleClearStats);
+    $('btnNext').addEventListener('click', goToNextQuestion);
+    $('btnReview').addEventListener('click', () => { renderReview(); showScreen('review'); });
+    $('btnReviewBack').addEventListener('click', () => showScreen('result'));
+    $('btnReplay').addEventListener('click', startGame);
+    $('btnReviewReplay').addEventListener('click', startGame);
+    // Một listener duy nhất cho các phương án (event delegation).
+    $('quizOptions').addEventListener('click', (event) => {
+      const button = event.target.closest('.option');
+      if (button && !button.disabled) selectAnswer(Number(button.dataset.index));
+    });
+    document.addEventListener('keydown', (event) => {
+      if (state.screen !== 'quiz' || state.answered) return;
+      const choice = ['1', '2', '3', '4'].indexOf(event.key);
+      if (choice !== -1) selectAnswer(choice);
+    });
+  }
+
+  function init() {
+    resetGame();
+    bindEvents();
+    renderStatistics();
+    showScreen('start');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
